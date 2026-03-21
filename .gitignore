@@ -169,3 +169,6 @@ outputs/
 
 # Jupyter Notebooks
 *.ipynb
+
+# macOS files
+.DS_Store
