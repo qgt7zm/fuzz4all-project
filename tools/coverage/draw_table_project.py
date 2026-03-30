@@ -8,9 +8,7 @@ def grab_csv_data(csv_file):
 
     with open(csv_file, newline="") as f:
         reader = csv.DictReader(f)
-        #headers = reader.fieldnames
         data = [row for row in reader]
-        #print(headers)
         print(data)
 
     # Aggregate rows by target and fuzzer
@@ -18,10 +16,12 @@ def grab_csv_data(csv_file):
     for row in data:
         target = row["target"]
         fuzzer = row["model"]
-        programs = int(row["count"])
-        coverage = int(row["coverage"])
+
+        programs = int(row["programs"])
+        coverage = int(row["line_coverage"])
         valid = int(row["valid"])
         valid_percent = round(valid / programs * 100, 2)
+
         aggregated[target][fuzzer][0].append(programs)
         aggregated[target][fuzzer][1].append(coverage)
         aggregated[target][fuzzer][2].append(valid_percent)

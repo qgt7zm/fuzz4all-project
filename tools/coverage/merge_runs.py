@@ -13,20 +13,23 @@ def process_run(run):
         with open(os.path.join(run, "language.txt")) as f:
             result["language"] = f.read().strip()
 
-        # Get tool (model)
+        # Get model
         with open(os.path.join(run, "model.txt")) as f:
-            result["model"] = f.read().strip().split("/")[-1]
+            model_full_name = f.read().strip()
+            result["model"] = model_full_name.split("/")[-1]
 
-        # Get final line coverage
+        # Get final coverage
         with open(os.path.join(run, "coverage.csv")) as f:
-            result["coverage"] = f.readlines()[-1].split(",")[1]
+            final_trial = f.readlines()[-1].split(",")
+            result["line_coverage"] = final_trial[1]
+            result["function_coverage"] = final_trial[2]
 
         # Count total programs
-        count = 0
+        programs = 0
         for file in os.listdir(run):
             if file.endswith(".fuzz"):
-                count += 1
-        result["count"] = count
+                programs += 1
+        result["programs"] = programs
 
         # Count valid programs
         with open(os.path.join(run, "valid.txt")) as f:
@@ -56,7 +59,7 @@ def main():
         
         # Save results
         with open(os.path.join(outputs, "results.csv"), "w") as csv_file:
-            columns = ["target", "language", "model", "coverage", "count", "valid"]
+            columns = ["target", "language", "model", "line_coverage", "function_coverage", "programs", "valid"]
             writer = csv.DictWriter(csv_file, columns)
 
             writer.writeheader()
