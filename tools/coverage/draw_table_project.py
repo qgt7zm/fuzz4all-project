@@ -1,4 +1,4 @@
-# Table 2: Fuzz4All against state-of-the-art fuzzers
+# Table 2: Fuzz4All models comparison (project version)
 import argparse
 
 def grab_csv_data(csv_file):
