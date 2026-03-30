@@ -9,7 +9,6 @@ def grab_csv_data(csv_file):
     with open(csv_file, newline="") as f:
         reader = csv.DictReader(f)
         data = [row for row in reader]
-        print(data)
 
     # Aggregate rows by target and fuzzer
     aggregated = defaultdict(lambda: defaultdict(lambda: [[], [], []]))
@@ -19,13 +18,12 @@ def grab_csv_data(csv_file):
 
         programs = int(row["programs"])
         coverage = int(row["line_coverage"])
-        valid = int(row["valid"])
+        valid = float(row["valid"])
         valid_percent = round(valid / programs * 100, 2)
 
         aggregated[target][fuzzer][0].append(programs)
         aggregated[target][fuzzer][1].append(coverage)
         aggregated[target][fuzzer][2].append(valid_percent)
-    print(aggregated)
 
     # Average num programs, line coverage, and valid %
     ret_rows = []
