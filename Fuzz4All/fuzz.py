@@ -164,11 +164,17 @@ def main_with_config(ctx, folder, cpu, batch_size, target, model_name):
     print(config_dict)
 
     target = make_target_with_config(config_dict)
+
     if not fuzzing["evaluate"]:
         assert (
             not os.path.exists(folder) or fuzzing["resume"]
         ), f"{folder} already exists!"
         os.makedirs(fuzzing["output_folder"], exist_ok=True)
+
+        write_to_file(config_dict["target"]["language"], os.path.join(folder, "language.txt"))
+        write_to_file(config_dict["fuzzing"]["target_name"], os.path.join(folder, "target.txt"))
+        write_to_file(config_dict["llm"]["model_name"], os.path.join(folder, "model.txt"))
+        
         fuzz(
             target=target,
             number_of_iterations=fuzzing["num"],
