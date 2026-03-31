@@ -81,71 +81,20 @@ def grab_max_min_average(points):
     return max_points, min_points, average_points
 
 
-def plot_c_full_run():
+def plot_project_run(language, target, folders):
+    print(f"Plotting {language} project coverage run ...")
     # figure size
     plt.figure(figsize=(6, 4))
 
-    folders = [
-        f"{BASE_DIR}c_demo1",
-        f"{BASE_DIR}c_demo2",
-    ]
-
-    points = []
     new_time = [i for i in range(1, 25)]
     # insert 0.5 at the beginning
     new_time.insert(0, 0.5)
+
+    points = []
     for folder in folders:
         with open(f"{folder}/coverage.csv", "r") as f:
             lines = f.readlines()
         # add zero, zero at the beginning of lines
-        lines.insert(0, "0,0,0,0\n")
-        line_cov, time, _ = grab_line_cov(lines, change_time=True, increase_index=False)
-
-        line_cov = extrapolate_points(line_cov, time, new_time)
-        points.append(line_cov)
-
-    max_points, min_points, average_points = grab_max_min_average(points)
-    plt.plot(
-        new_time,
-        average_points,
-        label="starcoder",
-        linewidth=2,
-        marker="*",
-        markersize=8,
-    )
-    plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
-
-    plt.xlabel("Hours")
-    plt.ylabel("Coverage (#K lines)")
-    # plt.title(title)
-    plt.tight_layout()
-    # xlimit
-    plt.xlim(0, 24)
-    # x ticks every 2 hours
-    plt.xticks([i * 2 for i in range(13)])
-    plt.legend(loc="lower right", ncol=2)
-    plt.savefig("fig/coverage-gcc-project.pdf")
-
-
-def plot_cpp_full_run():
-    # figure size
-    plt.figure(figsize=(6, 4))
-
-    new_time = [i for i in range(1, 25)]
-    # insert 0.5 at the beginning
-    new_time.insert(0, 0.5)
-
-    folders = [
-        f"{BASE_DIR}cpp_demo1",
-        f"{BASE_DIR}cpp_demo2",
-    ]
-
-    points = []
-
-    for folder in folders:
-        with open(f"{folder}/coverage.csv", "r") as f:
-            lines = f.readlines()
-
         lines.insert(0, "0,0,0,0\n")
         line_cov, time, _ = grab_line_cov(lines, change_time=True, increase_index=False)
 
@@ -157,7 +106,7 @@ def plot_cpp_full_run():
     plt.plot(
         new_time,
         average_points,
-        label="starcoder",
+        label="starcoder",  # TODO read model name + size
         linewidth=2,
         marker="*",
         markersize=8,
@@ -169,15 +118,30 @@ def plot_cpp_full_run():
     # plt.title(title)
     plt.tight_layout()
     # xlimit
-    plt.xlim(0, 24)
+    plt.xlim(0, 24)  # TODO fix time axis
     # x ticks every 2 hours
     plt.xticks([i * 2 for i in range(13)])
     plt.legend(loc="lower right")
-    plt.savefig("fig/coverage-g++-project.pdf")
+    plt.savefig(f"fig/coverage-{target}-project.pdf")
 
 
 if __name__ == "__main__":
-    print("Plotting CPP project coverage run ...")
-    plot_cpp_full_run()
-    print("Plotting C project coverage run ...")
-    plot_c_full_run()
+    # C++
+    plot_project_run(
+        "CPP",
+        "g++",
+        [
+            f"{BASE_DIR}cpp_demo1",
+            f"{BASE_DIR}cpp_demo2",
+        ]
+    )
+
+    # C
+    plot_project_run(
+        "C",
+        "gcc",
+        [
+            f"{BASE_DIR}c_demo1",
+            f"{BASE_DIR}c_demo2",
+        ]
+    )
