@@ -81,12 +81,13 @@ def grab_max_min_average(points):
     return max_points, min_points, average_points
 
 
-def plot_project_run(language, target, folders, duration=24, tick=2, units="Hours"):
+def plot_project_run(language, target, folders, duration=24, resolution=1, tick=2, units="Hours"):
     print(f"Plotting {language} project coverage run ...")
     # figure size
     plt.figure(figsize=(6, 4))
 
-    new_time = [i for i in range(1, duration + 1)]
+    # measurements every 1 hour over 24 hours
+    new_time = [i * resolution for i in range(1, duration // resolution + 1)]
     # insert 0.5 at the beginning
     new_time.insert(0, 0.5)
 
@@ -111,6 +112,7 @@ def plot_project_run(language, target, folders, duration=24, tick=2, units="Hour
         marker="*",
         markersize=8,
     )
+    # TODO specify color
     plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
 
     plt.xlabel(units)
@@ -136,6 +138,7 @@ if __name__ == "__main__":
             f"{BASE_DIR}cpp_demo2",
         ],
         duration=60,
+        resolution=10,
         tick=10,
         units="Minutes"
     )
@@ -149,6 +152,7 @@ if __name__ == "__main__":
             f"{BASE_DIR}c_demo2",
         ],
         duration=60,
+        resolution=10,
         tick=10,
         units="Minutes"
     )
