@@ -22,8 +22,17 @@ mpl.rcParams["axes.linewidth"] = 1.2
 
 BASE_DIR = "outputs/"
 
+# units
 
-def grab_line_cov(lines, change_time=False, increase_index=True):
+MINUTES = "Minutes"
+HOURS = "Hours"
+SECONDS_PER = {
+    MINUTES: 60,
+    HOURS: 60 * 60,
+}
+
+
+def grab_line_cov(lines, change_time=False, increase_index=True, duration=24, unit=HOURS):
     line_cov = []
     func_cov = []
     intervals = []
@@ -34,11 +43,11 @@ def grab_line_cov(lines, change_time=False, increase_index=True):
         # func_cov.append(int(line.split(",")[2]))
         if change_time:
             if increase_index:
-                time.append((index + 1) * 24 / len(lines))
+                time.append((index + 1) * duration / len(lines))
             else:
-                time.append((index) * 24 / len(lines))
+                time.append((index) * duration / len(lines))
         else:
-            time.append(float(line.split(",")[3]) / (60 * 60))
+            time.append(float(line.split(",")[3]) / SECONDS_PER[unit])
 
     return line_cov, time, intervals
 
@@ -81,7 +90,7 @@ def grab_max_min_average(points):
     return max_points, min_points, average_points
 
 
-def plot_project_run(language, target, folders, duration=24, resolution=1, tick=2, units="Hours"):
+def plot_project_run(language, target, folders, duration=24, resolution=1, tick=2, units=HOURS):
     print(f"Plotting {language} project coverage run ...")
     # figure size
     plt.figure(figsize=(6, 4))
@@ -97,7 +106,7 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
             lines = f.readlines()
         # add zero, zero at the beginning of lines
         lines.insert(0, "0,0,0,0\n")
-        line_cov, time, _ = grab_line_cov(lines, change_time=True, increase_index=False)
+        line_cov, time, _ = grab_line_cov(lines, change_time=True, increase_index=False, duration=duration, unit=units)
 
         # increment of half an hour up to 24 hours
         line_cov = extrapolate_points(line_cov, time, new_time)
@@ -140,7 +149,7 @@ if __name__ == "__main__":
         duration=60,
         resolution=10,
         tick=10,
-        units="Minutes"
+        units=MINUTES
     )
 
     # C
@@ -154,5 +163,5 @@ if __name__ == "__main__":
         duration=60,
         resolution=10,
         tick=10,
-        units="Minutes"
+        units=MINUTES
     )
