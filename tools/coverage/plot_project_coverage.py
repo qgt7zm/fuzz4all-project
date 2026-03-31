@@ -17,7 +17,7 @@ mpl.rcParams["grid.color"] = "#cad4e5"
 mpl.rcParams["grid.linewidth"] = 1.2
 
 # dark blue
-mpl.rcParams["a xes.edgecolor"] = "#0b2457"
+mpl.rcParams["axes.edgecolor"] = "#0b2457"
 mpl.rcParams["axes.linewidth"] = 1.2
 
 BASE_DIR = "outputs/"
@@ -81,12 +81,12 @@ def grab_max_min_average(points):
     return max_points, min_points, average_points
 
 
-def plot_project_run(language, target, folders):
+def plot_project_run(language, target, folders, duration=24, tick=2, units="Hours"):
     print(f"Plotting {language} project coverage run ...")
     # figure size
     plt.figure(figsize=(6, 4))
 
-    new_time = [i for i in range(1, 25)]
+    new_time = [i for i in range(1, duration + 1)]
     # insert 0.5 at the beginning
     new_time.insert(0, 0.5)
 
@@ -113,14 +113,15 @@ def plot_project_run(language, target, folders):
     )
     plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
 
-    plt.xlabel("Hours")
+    plt.xlabel(units)
     plt.ylabel("Coverage (#K lines)")
     # plt.title(title)
     plt.tight_layout()
     # xlimit
-    plt.xlim(0, 24)  # TODO fix time axis
+    plt.xlim(0, duration)
     # x ticks every 2 hours
-    plt.xticks([i * 2 for i in range(13)])
+    # support fractional increments
+    plt.xticks([round(i * tick, 2) for i in range(int(duration / tick) + 1)])
     plt.legend(loc="lower right")
     plt.savefig(f"fig/coverage-{target}-project.pdf")
 
@@ -133,7 +134,10 @@ if __name__ == "__main__":
         [
             f"{BASE_DIR}cpp_demo1",
             f"{BASE_DIR}cpp_demo2",
-        ]
+        ],
+        duration=60,
+        tick=10,
+        units="Minutes"
     )
 
     # C
@@ -143,5 +147,8 @@ if __name__ == "__main__":
         [
             f"{BASE_DIR}c_demo1",
             f"{BASE_DIR}c_demo2",
-        ]
+        ],
+        duration=60,
+        tick=10,
+        units="Minutes"
     )
