@@ -1,5 +1,6 @@
 import argparse
 import csv
+import glob
 import os
 
 def process_run(run):
@@ -50,13 +51,13 @@ def main():
         results = []
 
         # Get results
-        for file in os.listdir(outputs):
-            run = os.path.join(outputs, file)
+        runs = glob.glob(os.path.join(outputs, "*"))
+        for run in runs:
             if os.path.isdir(run):
                 result = process_run(run)
                 if result is not None:
                     results.append(result)
-        
+            
         # Save results
         with open(os.path.join(outputs, "results.csv"), "w") as csv_file:
             columns = ["target", "language", "model", "line_coverage", "function_coverage", "programs", "valid"]
