@@ -4,6 +4,7 @@
 # Configuration of the overall fuzzing setup
 fuzzing:
   # where to store the results (relative to the where you are calling fuzz.py)
+  # Note: overridden by bash script variable
   output_folder: "OUTPUT_FOLDER"
   # number of fuzzing iterations
   num: 6000
@@ -55,6 +56,29 @@ target:
   # string to check if the generated input is valid. If the string is present
   # in the generated input, the input is considered valid.
   target_string: ""
+
+# --------------------------------------------------------------------------- #
+# Configuration of the Large Language Model (LLM) setup
+llm:
+  # temperature to query the LLM model when generating output.
+  temperature: 1
+  # batch size
+  batch_size: 30
+  # use hardware acceleration (GPU) for the LLM model
+  device: cuda
+  # model name according to the HuggingFace model hub
+  # note that you can also export your cache such as this:
+  # export TRANSFORMERS_CACHE=/blabla/cache/
+  # Note: overridden by terminal script variable
+  model_name: bigcode/starcoderbase
+  # local model folder (absolute path)
+  # if not set, the model will be downloaded from the HuggingFace model hub
+  # model_folder: /home/username/local_model_repository
+  # additional end of sequence tokens
+  # additional_eos_tokens:
+  #   - "<eom>"
+  # maximum length of the generated llm output
+  max_length: 1024
 
 
 # --------------------------------------------------------------------------- #
