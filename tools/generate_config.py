@@ -3,12 +3,6 @@ import os
 
 import yaml
 
-# TODO
-# Substitute base fields into template
-# Take output folder
-# Take model name
-# Create config
-
 
 def load_config_file(filepath):
     with open(filepath, "r") as f:
@@ -31,18 +25,21 @@ if __name__ == "__main__":
     parser.add_argument("--output-folder", type=str, required=True)
     parser.add_argument("--iterations", type=int, default=6000)
     parser.add_argument("--time", type=int, default=12)
+    parser.add_argument("--batch-size", type=int, default=30)
     parser.add_argument("--model", type=str, default="ollama/starcoder")
+    parser.add_argument("--target", type=str, required=True)
     args = parser.parse_args()
     
     if os.path.isfile(args.base_config):
         # Load config files
-        template_file = "config/template.yaml"
-        base_file = args.base_config
-        template = load_config_file(template_file)
-        base = load_config_file(base_file)
+        template_cfg = "config/template.yaml"
+        base_cfg = args.base_config
+        template = load_config_file(template_cfg)
+        base = load_config_file(base_cfg)
+        output_folder = args.output_folder
 
         # Modify run config
-        template["fuzzing"]["output_folder"] = args.output_folder
+        template["fuzzing"]["output_folder"] = output_folder
         template["fuzzing"]["num"] = args.iterations
         template["fuzzing"]["total_time"] = args.time
         template["ollama"]["model_name"] = args.model
@@ -53,9 +50,28 @@ if __name__ == "__main__":
         replace_value(template, base, "ollama", "model_name")
 
         # Save run config
-        output_file = template_file.split("/")[0] + "/"
-        output_file += args.output_folder.split("/")[-1] + ".yaml"
-        save_config_file(output_file, template)
+        output_cfg = template_cfg.split("/")[0] + "/"
+        output_cfg += output_folder.split("/")[-1] + ".yaml"
+        save_config_file(output_cfg, template)
+        print("Config generated at", output_cfg)
+
+        # Create run script
+        template_script = "scripts/template.sh"
+        with open(template_script, "r") as f:
+            script = f.read()
+            script = script.replace("{CONFIG_FILE}", output_cfg)
+            script = script.replace("{OUTPUT_FOLDER}", output_folder)
+            script = script.replace("{BATCH_SIZE}", str(args.batch_size))
+            script = script.replace("{MODEL_NAME}", args.model)
+            script = script.replace("{TARGET}", args.target)
+        
+
+        # Save run script
+        output_script = template_script.split("/")[0] + "/"
+        output_script += output_folder.split("/")[-1] + ".sh"
+        with open(output_script, "w") as f:
+            f.write(script)
+        print("Script generated at", output_script)
     else:
         print("Not a valid config")
 
