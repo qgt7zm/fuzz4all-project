@@ -36,7 +36,7 @@ if __name__ == "__main__":
         base_cfg = args.base_config
         template = load_config_file(template_cfg)
         base = load_config_file(base_cfg)
-        output_folder = args.output_folder
+        output_folder = os.path.normpath(args.output_folder)
 
         # Modify run config
         template["fuzzing"]["output_folder"] = output_folder
@@ -50,8 +50,9 @@ if __name__ == "__main__":
         replace_value(template, base, "ollama", "model_name")
 
         # Save run config
-        output_cfg = template_cfg.split("/")[0] + "/"
-        output_cfg += output_folder.split("/")[-1] + ".yaml"
+        output_cfg = os.path.dirname(template_cfg)
+        output_cfg = os.path.join(output_cfg, os.path.basename(output_folder))
+        output_cfg += ".yaml"
         save_config_file(output_cfg, template)
         print("Config generated at", output_cfg)
 
@@ -65,10 +66,10 @@ if __name__ == "__main__":
             script = script.replace("{MODEL_NAME}", args.model)
             script = script.replace("{TARGET}", args.target)
         
-
         # Save run script
-        output_script = template_script.split("/")[0] + "/"
-        output_script += output_folder.split("/")[-1] + ".sh"
+        output_script = os.path.dirname(template_script)
+        output_script = os.path.join(output_script, os.path.basename(output_folder))
+        output_script += ".sh"
         with open(output_script, "w") as f:
             f.write(script)
         print("Script generated at", output_script)
