@@ -1,4 +1,6 @@
 # Figure 4: Coverage trend of Fuzz4All against state-of-the-art fuzzers (project version)
+import os
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
@@ -138,18 +140,24 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
 
 if __name__ == "__main__":
+    num_runs = 2
+    time_duration = 12
+    time_resolution = 1
+    time_tick = 2
+    time_units = HOURS
+
     # C++
     plot_project_run(
         "CPP",
         "g++",
         [
-            f"{BASE_DIR}cpp_demo1",
-            f"{BASE_DIR}cpp_demo2",
+            os.path.join(BASE_DIR, f"cpp_project{i}")
+            for i in range(1, num_runs + 1)
         ],
-        duration=60,
-        resolution=10,
-        tick=10,
-        units=MINUTES
+        duration=time_duration,
+        resolution=time_resolution,
+        tick=time_tick,
+        units=time_units
     )
 
     # C
@@ -157,11 +165,11 @@ if __name__ == "__main__":
         "C",
         "gcc",
         [
-            f"{BASE_DIR}c_demo1",
-            f"{BASE_DIR}c_demo2",
+            os.path.join(BASE_DIR, f"c_project{i}")
+            for i in range(1, num_runs + 1)
         ],
-        duration=60,
-        resolution=10,
-        tick=10,
-        units=MINUTES
+        duration=time_duration,
+        resolution=time_resolution,
+        tick=time_tick,
+        units=time_units
     )
