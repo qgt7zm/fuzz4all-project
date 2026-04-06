@@ -1,6 +1,7 @@
 # Figure 4: Coverage trend of Fuzz4All against state-of-the-art fuzzers (project version)
 import argparse
 import os
+from collections import defaultdict, namedtuple
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -101,12 +102,16 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
     # insert 0.5 at the beginning
     new_time.insert(0, 0.5)
 
-    points = []
+    model_points = defaultdict(list)
     for folder in folders:
         if os.path.isdir(folder):
             # folder does not exist
             continue
-        with open(f"{folder}/coverage.csv", "r") as f:
+
+        with open(os.path.join(folder, "model.txt"), "r") as f:
+            model_name = f.read().strip()
+
+        with open(os.path.join(folder, "coverage.csv"), "r") as f:
             lines = f.readlines()
         # add zero, zero at the beginning of lines
         lines.insert(0, "0,0,0,0\n")
@@ -114,19 +119,20 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
         # increment of half an hour up to 24 hours
         line_cov = extrapolate_points(line_cov, time, new_time)
-        points.append(line_cov)
+        model_points[model_name].append(line_cov)
 
-    max_points, min_points, average_points = grab_max_min_average(points)
-    plt.plot(
-        new_time,
-        average_points,
-        label="starcoder",  # TODO read model name + size
-        linewidth=2,
-        marker="*",
-        markersize=8,
-    )
-    # TODO specify color
-    plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
+    for model, points in model_points.items():
+        max_points, min_points, average_points = grab_max_min_average(points)
+        plt.plot(
+            new_time,
+            average_points,
+            label=model_name,
+            linewidth=2,
+            marker="*",
+            markersize=8,
+        )
+        # TODO specify color
+        plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
 
     plt.xlabel(units)
     plt.ylabel("Coverage (#K lines)")
