@@ -1,4 +1,5 @@
 # Figure 4: Coverage trend of Fuzz4All against state-of-the-art fuzzers (project version)
+import argparse
 import os
 
 import matplotlib as mpl
@@ -21,8 +22,6 @@ mpl.rcParams["grid.linewidth"] = 1.2
 # dark blue
 mpl.rcParams["axes.edgecolor"] = "#0b2457"
 mpl.rcParams["axes.linewidth"] = 1.2
-
-BASE_DIR = "outputs/"
 
 # units
 
@@ -104,6 +103,9 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
     points = []
     for folder in folders:
+        if os.path.isdir(folder):
+            # folder does not exist
+            continue
         with open(f"{folder}/coverage.csv", "r") as f:
             lines = f.readlines()
         # add zero, zero at the beginning of lines
@@ -140,36 +142,32 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
 
 if __name__ == "__main__":
-    num_runs = 2
-    time_duration = 12
-    time_resolution = 1
-    time_tick = 2
-    time_units = HOURS
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--outputs", type=str, default="outputs")
+    parser.add_argument("--num-runs", type=int, default=2)
+    parser.add_argument("--duration", type=int, default=12)
+    parser.add_argument("--resolution", type=int, default=1)
+    parser.add_argument("--tick", type=int, default=2)
+    parser.add_argument("--units", type=str, default=HOURS)
+    args = parser.parse_args()
 
-    # C++
-    plot_project_run(
-        "CPP",
-        "g++",
-        [
-            os.path.join(BASE_DIR, f"cpp_project{i}")
-            for i in range(1, num_runs + 1)
-        ],
-        duration=time_duration,
-        resolution=time_resolution,
-        tick=time_tick,
-        units=time_units
-    )
+    plots = [
+        ("CPP", "g++", "cpp_project"),  # C++
+        ("C", "gcc", "c_project"),  # C
+    ]
 
-    # C
-    plot_project_run(
-        "C",
-        "gcc",
-        [
-            os.path.join(BASE_DIR, f"c_project{i}")
-            for i in range(1, num_runs + 1)
-        ],
-        duration=time_duration,
-        resolution=time_resolution,
-        tick=time_tick,
-        units=time_units
-    )
+    for plot in plots:
+        plot_lang, plot_targ, folder_prefix = plot
+        plot_project_run(
+            plot_lang,
+            plot_targ,
+            [
+                os.path.join(args.outputs, f"{folder_prefix}{i}")
+                for i in range(1, args.num_runs + 1)
+            ],
+            duration=args.duration,
+            resolution=args.resolution,
+            tick=args.tick,
+            units=args.units.title()
+        )
+
