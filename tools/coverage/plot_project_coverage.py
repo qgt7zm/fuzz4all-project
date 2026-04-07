@@ -104,12 +104,12 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
     model_points = defaultdict(list)
     for folder in folders:
-        if os.path.isdir(folder):
+        if not os.path.isdir(folder):
             # folder does not exist
             continue
 
         with open(os.path.join(folder, "model.txt"), "r") as f:
-            model_name = f.read().strip()
+            model_name = f.read().strip().split("/")[-1]
 
         with open(os.path.join(folder, "coverage.csv"), "r") as f:
             lines = f.readlines()
@@ -121,11 +121,12 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
         line_cov = extrapolate_points(line_cov, time, new_time)
         model_points[model_name].append(line_cov)
 
-    for model, points in model_points.items():
+    for model_name, points in model_points.items():
         max_points, min_points, average_points = grab_max_min_average(points)
         plt.plot(
             new_time,
             average_points,
+		
             label=model_name,
             linewidth=2,
             marker="*",
@@ -149,7 +150,7 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--outputs", type=str, default="outputs")
+    parser.add_argument("--outputs", type=str, required=True)
     parser.add_argument("--num-runs", type=int, default=2)
     parser.add_argument("--duration", type=int, default=12)
     parser.add_argument("--resolution", type=int, default=1)
