@@ -1,5 +1,6 @@
 # Figure 4: Coverage trend of Fuzz4All against state-of-the-art fuzzers (project version)
 import argparse
+import glob
 import os
 from collections import defaultdict, namedtuple
 
@@ -159,19 +160,26 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     plots = [
-        ("CPP", "g++", "cpp_project"),  # C++
-        ("C", "gcc", "c_project"),  # C
+        ("CPP", "g++", "cpp_*"),  # C++
+        ("C", "gcc", "c_*"),  # C
+    ]
+    # TODO store colors
+    models = [
+        "starcoder",
+        "qwen3.5_4b",
     ]
 
     for plot in plots:
-        plot_lang, plot_targ, folder_prefix = plot
+        plot_language, plot_target, folder_pattern = plot
+        plot_folders = []
+        for model in models:
+            pattern = os.path.join(args.outputs, model, folder_pattern)
+            plot_folders += glob.glob(pattern, recursive=True)
+
         plot_project_run(
-            plot_lang,
-            plot_targ,
-            [
-                os.path.join(args.outputs, f"{folder_prefix}{i}")
-                for i in range(1, args.num_runs + 1)
-            ],
+            plot_language,
+            plot_target,
+            plot_folders,
             duration=args.duration,
             resolution=args.resolution,
             tick=args.tick,
