@@ -100,8 +100,8 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
 
     # measurements every 1 hour over 24 hours
     new_time = [i * resolution for i in range(1, duration // resolution + 1)]
-    # insert 0.5 at the beginning
-    new_time.insert(0, 0.5)
+    # insert 0 at the beginning
+    new_time.insert(0, 0)
 
     model_points = defaultdict(list)
     for folder in folders:
@@ -133,8 +133,7 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
             marker="*",
             markersize=8,
         )
-        # TODO specify color
-        plt.fill_between(new_time, min_points, max_points, alpha=0.2, color="blue")
+        plt.fill_between(new_time, min_points, max_points, alpha=0.2)
 
     plt.xlabel(units)
     plt.ylabel("Coverage (#K lines)")
@@ -163,23 +162,16 @@ if __name__ == "__main__":
         ("CPP", "g++", "cpp_*"),  # C++
         ("C", "gcc", "c_*"),  # C
     ]
-    # TODO store colors
-    models = [
-        "starcoder",
-        "qwen3.5_4b",
-    ]
 
     for plot in plots:
         plot_language, plot_target, folder_pattern = plot
-        plot_folders = []
-        for model in models:
-            pattern = os.path.join(args.outputs, model, folder_pattern)
-            plot_folders += glob.glob(pattern, recursive=True)
+        # Search all subfolders for fuzzing runs
+        pattern = os.path.join(args.outputs, "**", folder_pattern)
 
         plot_project_run(
             plot_language,
             plot_target,
-            plot_folders,
+            glob.glob(pattern, recursive=True),
             duration=args.duration,
             resolution=args.resolution,
             tick=args.tick,
