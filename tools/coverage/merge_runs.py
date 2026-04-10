@@ -51,7 +51,8 @@ def main():
         results = []
 
         # Get results
-        runs = glob.glob(os.path.join(outputs, "*"))
+        # Search all subfolders for fuzzing runs
+        runs = glob.glob(os.path.join(outputs, "**/*"), recursive=True)
         for run in runs:
             if os.path.isdir(run):
                 result = process_run(run)
