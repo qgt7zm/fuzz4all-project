@@ -31,7 +31,7 @@ def grab_csv_data(csv_file):
         for tool_name, trials in tools.items():
             avg_progs = str(int(st.mean(trials[0])))
             avg_cov = str(int(st.mean(trials[1])))
-            avg_valid = str(round(st.mean(trials[2]), 2)) + "%"
+            avg_valid = f"{round(st.mean(trials[2]), 2):.2f}" + "%"
 
             ret_rows.append([target, tool_name, avg_progs, avg_valid, avg_cov])
 
@@ -46,13 +46,13 @@ def rich_print(rows):
     table = Table(
         show_header=True,
         header_style="bold magenta",
-        title="Fuzz4All against state-of-the-art fuzzers",
+        title="Fuzz4All fuzzing performance with different models",
     )
 
     table.add_column("Target", style="dim", no_wrap=True)
-    table.add_column("Fuzzer", justify="right", style="bold green")
-    table.add_column("# programs", justify="right", style="bold blue")
-    table.add_column("% valid", justify="right", style="bold blue")
+    table.add_column("Model", justify="right", style="bold green")
+    table.add_column("# Programs", justify="right", style="bold blue")
+    table.add_column("% Valid", justify="right", style="bold blue")
     table.add_column("Coverage", justify="right", style="bold blue")
 
     for row in rows:
