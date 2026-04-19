@@ -31,12 +31,13 @@ def grab_csv_data(csv_file):
     # Average num programs, line coverage, and valid %
     ret_rows = []
     for target, tools in aggregated.items():
+        short_target = target.split("/")[-1]
         for tool_name, trials in tools.items():
-            avg_progs = str(int(st.mean(trials[0])))
+            avg_progs = f"{int(st.mean(trials[0])):,}"
             avg_valid = f"{round(st.mean(trials[1]), 2):.2f}" + "%"
-            avg_cov = str(int(st.mean(trials[2])))
+            avg_cov = f"{int(st.mean(trials[2])):,}"
 
-            ret_rows.append([target, tool_name, avg_progs, avg_valid, avg_cov])
+            ret_rows.append([short_target, tool_name, avg_progs, avg_valid, avg_cov])
 
     # Sort rows by target and model
     # Keep the baseline on top
