@@ -1,12 +1,13 @@
 # Table 2: Fuzz4All models comparison (project version)
 import argparse
+from collections import defaultdict, namedtuple
 
 BASELINE = "starcoder:3b"
+FuzzingRun = namedtuple("FuzzingRun", ["programs", "valid", "coverage", "total_lines", "avg_lines"])
 
 
 def grab_csv_data(csv_file):
     import csv
-    from collections import defaultdict
     import statistics as st
 
     with open(csv_file, newline="") as f:
@@ -14,30 +15,42 @@ def grab_csv_data(csv_file):
         data = [row for row in reader]
 
     # Aggregate rows by target and fuzzing model
-    aggregated = defaultdict(lambda: defaultdict(lambda: [[], [], []]))
+    aggregated = defaultdict(lambda: defaultdict(list))
     for row in data:
         target = row["target"]
         fuzzer = row["model"]
 
         programs = int(row["programs"])
         valid = float(row["valid"])
-        valid_percent = round(valid / programs * 100, 2)
+        valid_percent = valid / programs
         coverage = int(row["line_coverage"])
+        total_lines = int(row["lines_of_code"])
+        avg_lines = total_lines / programs
 
-        aggregated[target][fuzzer][0].append(programs)
-        aggregated[target][fuzzer][1].append(valid_percent)
-        aggregated[target][fuzzer][2].append(coverage)
+        aggregated[target][fuzzer].append(
+            FuzzingRun(programs, valid_percent, coverage, total_lines, avg_lines)
+        )
 
-    # Average num programs, line coverage, and valid %
+    # Average num programs, valid %, coverage, and LoC
     ret_rows = []
     for target, tools in aggregated.items():
         short_target = target.split("/")[-1]
         for tool_name, trials in tools.items():
-            avg_progs = f"{int(st.mean(trials[0])):,}"
-            avg_valid = f"{round(st.mean(trials[1]), 2):.2f}" + "%"
-            avg_cov = f"{int(st.mean(trials[2])):,}"
+            avg_programs = int(st.mean([trial.programs for trial in trials]))
+            avg_valid = round(st.fmean([trial.valid for trial in trials]), 4)
+            avg_coverage = int(st.mean([trial.coverage for trial in trials]))
+            avg_total_lines = int(st.mean([trial.total_lines for trial in trials]))
+            avg_avg_lines = int(st.mean([trial.avg_lines for trial in trials]))
 
-            ret_rows.append([short_target, tool_name, avg_progs, avg_valid, avg_cov])
+            ret_rows.append([
+                short_target,
+                tool_name,
+                f"{avg_programs:,}",
+                f"{avg_valid:.2%}",
+                f"{avg_coverage:,}",
+                f"{avg_total_lines:,}",
+                f"{avg_avg_lines:,}",
+            ])
 
     # Sort rows by target and model
     # Keep the baseline on top
@@ -61,7 +74,9 @@ def rich_print(rows):
     table.add_column("Model", justify="right", style="bold green")
     table.add_column("# Programs", justify="right", style="bold blue")
     table.add_column("% Valid", justify="right", style="bold blue")
-    table.add_column("Line Coverage", justify="right", style="bold blue")
+    table.add_column("Line Cov.", justify="right", style="bold blue")
+    table.add_column("Total LoC", justify="right", style="bold blue")
+    table.add_column("Avg. LoC", justify="right", style="bold blue")
 
     for row in rows:
         table.add_row(*row)
