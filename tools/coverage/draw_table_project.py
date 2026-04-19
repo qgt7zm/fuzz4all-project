@@ -1,6 +1,9 @@
 # Table 2: Fuzz4All models comparison (project version)
 import argparse
 
+BASELINE = "starcoder:3b"
+
+
 def grab_csv_data(csv_file):
     import csv
     from collections import defaultdict
@@ -10,31 +13,35 @@ def grab_csv_data(csv_file):
         reader = csv.DictReader(f)
         data = [row for row in reader]
 
-    # Aggregate rows by target and fuzzer
+    # Aggregate rows by target and fuzzing model
     aggregated = defaultdict(lambda: defaultdict(lambda: [[], [], []]))
     for row in data:
         target = row["target"]
         fuzzer = row["model"]
 
         programs = int(row["programs"])
-        coverage = int(row["line_coverage"])
         valid = float(row["valid"])
         valid_percent = round(valid / programs * 100, 2)
+        coverage = int(row["line_coverage"])
 
         aggregated[target][fuzzer][0].append(programs)
-        aggregated[target][fuzzer][1].append(coverage)
-        aggregated[target][fuzzer][2].append(valid_percent)
+        aggregated[target][fuzzer][1].append(valid_percent)
+        aggregated[target][fuzzer][2].append(coverage)
 
     # Average num programs, line coverage, and valid %
     ret_rows = []
     for target, tools in aggregated.items():
         for tool_name, trials in tools.items():
             avg_progs = str(int(st.mean(trials[0])))
-            avg_cov = str(int(st.mean(trials[1])))
-            avg_valid = f"{round(st.mean(trials[2]), 2):.2f}" + "%"
+            avg_valid = f"{round(st.mean(trials[1]), 2):.2f}" + "%"
+            avg_cov = str(int(st.mean(trials[2])))
 
             ret_rows.append([target, tool_name, avg_progs, avg_valid, avg_cov])
 
+    # Sort rows by target and model
+    # Keep the baseline on top
+    ret_rows.sort(key=lambda r: "" if r[1] == BASELINE else r[1])
+    ret_rows.sort(key=lambda r: r[0])
     return ret_rows
 
 
@@ -53,7 +60,7 @@ def rich_print(rows):
     table.add_column("Model", justify="right", style="bold green")
     table.add_column("# Programs", justify="right", style="bold blue")
     table.add_column("% Valid", justify="right", style="bold blue")
-    table.add_column("Coverage", justify="right", style="bold blue")
+    table.add_column("Line Coverage", justify="right", style="bold blue")
 
     for row in rows:
         table.add_row(*row)
