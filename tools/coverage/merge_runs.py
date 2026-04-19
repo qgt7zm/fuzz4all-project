@@ -3,6 +3,16 @@ import csv
 import glob
 import os
 
+def count_lines(filepath):
+    lines = 0
+    with open(filepath, "r") as f:
+        for line in f:
+            # Only count non-blank lines
+            if line.strip() != "":
+                lines += 1
+    return lines
+
+
 def process_run(run):
     result = {}
     try:
@@ -25,15 +35,19 @@ def process_run(run):
             result["line_coverage"] = final_trial[1]
             result["function_coverage"] = final_trial[2]
 
-        # Count total programs
+        # Count total programs and lines of code
         programs = 0
-        for file in os.listdir(run):
-            if file.endswith(".fuzz"):
+        total_lines = 0
+        for program in os.listdir(run):
+            if program.endswith(".fuzz"):
                 programs += 1
+                total_lines += count_lines(os.path.join(run, program))
+                    
         result["programs"] = programs
+        result["lines_of_code"] = total_lines
 
         # Count valid programs
-        with open(os.path.join(run, "valid.txt")) as f:
+        with open(os.path.join(run, "valid.txt"), "r") as f:
             result["valid"] = f.readline().strip()
 
         return result
@@ -54,14 +68,14 @@ def main():
         # Search all subfolders for fuzzing runs
         runs = glob.glob(os.path.join(outputs, "**/*"), recursive=True)
         for run in runs:
-            if os.path.isdir(run):
+            if os.path.isdir(run) and not run.endswith("prompts"):
                 result = process_run(run)
                 if result is not None:
                     results.append(result)
             
         # Save results
         with open(os.path.join(outputs, "results.csv"), "w") as csv_file:
-            columns = ["target", "language", "model", "line_coverage", "function_coverage", "programs", "valid"]
+            columns = ["target", "language", "model", "line_coverage", "function_coverage", "programs", "valid", "lines_of_code"]
             writer = csv.DictWriter(csv_file, columns)
 
             writer.writeheader()
