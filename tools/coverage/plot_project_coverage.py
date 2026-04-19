@@ -25,7 +25,7 @@ mpl.rcParams["grid.linewidth"] = 1.2
 mpl.rcParams["axes.edgecolor"] = "#0b2457"
 mpl.rcParams["axes.linewidth"] = 1.2
 
-# units
+# Units
 
 MINUTES = "Minutes"
 HOURS = "Hours"
@@ -33,6 +33,9 @@ SECONDS_PER = {
     MINUTES: 60,
     HOURS: 60 * 60,
 }
+
+BASELINE="starcoder:3b"
+EXCLUDE=["starcoder2:3b", "starcoder2:7b"]
 
 
 def grab_line_cov(lines, change_time=False, increase_index=True, duration=24, unit=HOURS):
@@ -122,12 +125,18 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
         line_cov = extrapolate_points(line_cov, time, new_time)
         model_points[model_name].append(line_cov)
 
-    for model_name, points in model_points.items():
+    # sort plots by model name
+    model_names = list(model_points.keys())
+    model_names.sort(key=lambda name: "" if name == BASELINE else name)
+    model_names = list(filter(lambda name: name not in EXCLUDE, model_names))
+    print(model_names)
+
+    for model_name in model_names:
+        points = model_points[model_name]
         max_points, min_points, average_points = grab_max_min_average(points)
-        plt.plot(
+        handle = plt.plot(
             new_time,
             average_points,
-		
             label=model_name,
             linewidth=2,
             marker="*",
@@ -136,7 +145,7 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
         plt.fill_between(new_time, min_points, max_points, alpha=0.2)
 
     plt.xlabel(units)
-    plt.ylabel("Coverage (#K lines)")
+    plt.ylabel("Coverage (1,000 lines)")
     # plt.title(title)
     plt.tight_layout()
     # xlimit
