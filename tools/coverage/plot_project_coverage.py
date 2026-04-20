@@ -6,7 +6,9 @@ from collections import defaultdict, namedtuple
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+from cycler import cycler
 
+# Plot style
 # set plot to use latex fonts
 
 plt.style.use(
@@ -25,6 +27,10 @@ mpl.rcParams["grid.linewidth"] = 1.2
 mpl.rcParams["axes.edgecolor"] = "#0b2457"
 mpl.rcParams["axes.linewidth"] = 1.2
 
+# add one more color
+colors = mpl.rcParams["axes.prop_cycle"].by_key()["color"]  
+mpl.rcParams["axes.prop_cycle"] = cycler(color=["#454545"] + colors)
+
 # Units
 
 MINUTES = "Minutes"
@@ -35,7 +41,6 @@ SECONDS_PER = {
 }
 
 BASELINE="starcoder:3b"
-EXCLUDE=["starcoder2:3b", "starcoder2:7b"]
 
 
 def grab_line_cov(lines, change_time=False, increase_index=True, duration=24, unit=HOURS):
@@ -99,7 +104,7 @@ def grab_max_min_average(points):
 def plot_project_run(language, target, folders, duration=24, resolution=1, tick=2, units=HOURS):
     print(f"Plotting {language} project coverage run ...")
     # figure size
-    plt.figure(figsize=(6, 4))
+    plt.figure(figsize=(7.5, 5))
 
     # measurements every 1 hour over 24 hours
     new_time = [i * resolution for i in range(1, duration // resolution + 1)]
@@ -128,19 +133,23 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
     # sort plots by model name
     model_names = list(model_points.keys())
     model_names.sort(key=lambda name: "" if name == BASELINE else name)
-    model_names = list(filter(lambda name: name not in EXCLUDE, model_names))
-    print(model_names)
 
     for model_name in model_names:
         points = model_points[model_name]
         max_points, min_points, average_points = grab_max_min_average(points)
-        handle = plt.plot(
+        if model_name == BASELINE:
+            linestyle = "dashed"
+        else:
+            linestyle = "solid"
+
+        plt.plot(
             new_time,
             average_points,
             label=model_name,
             linewidth=2,
             marker="*",
             markersize=8,
+            linestyle=linestyle,
         )
         plt.fill_between(new_time, min_points, max_points, alpha=0.2)
 
@@ -154,7 +163,7 @@ def plot_project_run(language, target, folders, duration=24, resolution=1, tick=
     # support fractional increments
     plt.xticks([round(i * tick, 2) for i in range(int(duration / tick) + 1)])
     plt.legend(loc="lower right")
-    plt.savefig(f"fig/coverage-{target}-project.pdf")
+    plt.savefig(f"fig/coverage-{target}-project.png")
 
 
 if __name__ == "__main__":
