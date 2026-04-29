@@ -161,6 +161,7 @@ cython_debug/
 .idea/
 
 # some project specific stuff
+fig/
 outputs/
 coverage/
 
