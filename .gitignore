@@ -162,6 +162,7 @@ cython_debug/
 
 # some project specific stuff
 outputs/
+coverage/
 
 # data files
 *.jsonl
