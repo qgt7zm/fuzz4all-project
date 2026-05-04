@@ -24,10 +24,10 @@
 
 - It is recommended you collect coverage in the Docker container since all the executable paths have already been set up.
 - Login to the container and navigate to /home/Fuzz4all.
-- Activate your conda environment and do run `python tools/coverage/my_lang/collect_coverage.py --folder my_folder --interval my_interval`
+- Activate your conda environment and run `python tools/coverage/my_lang/collect_coverage.py --folder my_folder --interval my_interval`.
 - You may also modify and run [scripts/do\_coverage.sh](scripts/do_coverage.sh) after mounting it to the container.
 
 ## Results
 
-- Run [scripts/make\_results.sh] to draw the coverage table and plots.
-- You can view your saved figures in fig/.
+- Run [scripts/make\_results.sh](scripts/make\_results.sh) to draw the coverage table and plots.
+- You can view your saved figures in fig/ and compare them with mine in [results/](results).
