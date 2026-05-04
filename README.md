@@ -13,6 +13,8 @@ This repository contains the source code for our ICSE'24 paper <i> "Fuzz4All: Un
 
 Final project for CS 6501: Software Security Testing, Spring 2026, at UVA. I extend Fuzz4All to run with different models and compare the coverage performance with more up-to-date LLMs.
 
+See [README\_project.md](README_project.md) for an explanation of how to reproduce the project.
+
 ## 🌌️ About
 
 `Fuzz4All` -- the first fuzzer that can universally target many input languages and features of these languages.
