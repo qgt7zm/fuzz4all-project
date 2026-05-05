@@ -11,7 +11,7 @@
 
 - You may want to install [Ollama](https://ollama.com/) on your host machine since the container does hot have Ollama or the latest repository changes installed.
 - If you are running Fuzz4all locally, make sure to create a [conda](https://www.anaconda.com/docs/getting-started/miniconda/main) environment.
-- Run [scripts/get\_config.sh](scripts/get_config.sh) to generate run configurations and scripts. Modify it to change the model and other parameters.
+- Run [scripts/get\_configs.sh](scripts/get_configs.sh) to generate run configurations and scripts. Modify it to change the model and other parameters.
 
 ## Fuzzing
 
